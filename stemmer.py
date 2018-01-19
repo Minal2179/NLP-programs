@@ -1,4 +1,3 @@
-import string
 import re
 import atexit
 import fileinput
@@ -7,34 +6,27 @@ from nltk.tokenize import word_tokenize
 
 ps = PorterStemmer()
 
-# example_words = ["pythoner","pythoning","pythonly","pythoned","python"]
-
-# for w in example_words:
-#     print(ps.stem(w))
+@atexit.register
 def quit_gracefully():
-    print("end of file")
+    print("ENDFILE")
 
 def findType(inputToken):
-    if(type(inputToken) is int):
+    if(re.match('^[-+]?[0-9]+$', inputToken)):
         return "INT"
-    elif(type(inputToken) is str):
-        return "STRING"
-    elif(type(inputToken) is float):
+    elif(re.match('[+-]?([0-9]*[.])?[0-9]+',inputToken)):
         return "DOUBLE"
-    elif(atexit.register(quit_gracefully())):
-        return "ENDFILE"
-    else:
+    elif(re.match('\W',inputToken)):
         return "OP"
+    elif (type(inputToken) is str):
+        return "STRING"
 
 
-line_no = 0
-# words = input("Enter the input consisting of grammar and the text:")
+# stdin input 
 for line in fileinput.input():
     print(line);
-    line_no = line_no+1
     for w in word_tokenize(line):
         type_of_word = findType(w)
-        print(w)
-        print(type_of_word)
-        print(line_no)
-        print(ps.stem(w))
+        if line.find('=') == -1:
+            print(w, ' ', type_of_word, ' ', fileinput.lineno())
+        else:
+            print(w,' ',type_of_word,' ',fileinput.lineno(),' ',ps.stem(w))
