@@ -92,7 +92,10 @@ def main(): # Stemmer code followed by the grammar and parts of speech generatio
     array = []
     count = tempc = temps = colon = semi = 0
     for input_line in fileinput.input():
-        for w in word_tokenize(input_line): ## Stem code begins here
+        for w in word_tokenize(input_line): ## Stem code begins here - word by
+            if count == 0:
+                print("Stemmer: ")
+                count += 1
             type_of_word = find_type_of_word(w)
             if input_line.find('=') == -1:
                 if re.search('\|*\s*([a-zA-Z\-\s]+)', w) is not None:
@@ -133,18 +136,17 @@ def main(): # Stemmer code followed by the grammar and parts of speech generatio
     for line in array:
         sent = re.search('[^(a-zA-Z|\*|\s|\:|\=|\;|\-|\||\#|\.|\?|\!|\,|\'|\")]', line)
         if sent is not None and sent.group(0) is not None:
+            print("Input is invalid : Illegal!!!")
             exit("Input is invalid : Illegal!!!")
         elif line.isspace():
             continue
-        else:
-            if count == 0:
-                print("Stemmer: ")
-                count += 1
+
         semi = temps + line.count(';')
         colon = tempc + line.count(':')
         if semi == colon:
             semi = colon = temps = tempc = 0
         elif semi > colon:
+            print("Input is erroneous: Illegal!!!!")
             sys.exit("Input is erroneous: Illegal!!!!")
         else:
             tempc = colon
@@ -185,9 +187,11 @@ def main(): # Stemmer code followed by the grammar and parts of speech generatio
 
 
     if semi < colon:
+        print("Input is erroneous: Semicolon missing!!!")
         sys.exit("Input is erroneous: Semicolon missing!!!")
     print("ENDFILE")
-    if not grammar:
+    if not grammar or 'W' not in grammar:
+        print("No Input: Illegal!!!")
         sys.exit("No Input: Illegal!!!")
 
 
@@ -203,6 +207,7 @@ def initialize(words): #grammar is fed to the earley parser after initial checks
                         found += 1
 
         if found == 0:
+            print("Grammar is incorrect: Illegal!!!!")
             exit("Grammar is incorrect: Illegal!!!!")
     earley_parser(grammar["W"])
 
