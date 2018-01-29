@@ -91,23 +91,43 @@ def main(): # Stemmer code followed by the grammar and parts of speech generatio
     pattern_line = ""
     array = []
     count = tempc = temps = colon = semi = 0
-    for line in fileinput.input():
-        line.strip()
-        if "#" in line:
+    for input_line in fileinput.input():
+        for w in word_tokenize(input_line): ## Stem code begins here
+            type_of_word = find_type_of_word(w)
+            if input_line.find('=') == -1:
+                if re.search('\|*\s*([a-zA-Z\-\s]+)', w) is not None:
+                    stem_parts = re.split('\|', w)
+                    for i in range(len(stem_parts)):
+                        if len(stem_parts) > 1 and i == 1 and stem_parts[i] is not '':
+                            print('|', ' ', 'OP', ' ', fileinput.lineno())
+                        if stem_parts[i] is '':
+                            print('|', ' ', 'OP', ' ', fileinput.lineno())
+                        else:
+                            type_of_word = find_type_of_word(stem_parts[i])
+                            print(stem_parts[i], ' ', type_of_word, ' ', fileinput.lineno())
+                else:
+                    print(w, ' ', type_of_word, ' ', fileinput.lineno())
+            else:
+                if re.search('[A-Za-z]', w) is not None and w != "W":
+                    print(w, ' ', type_of_word, ' ', fileinput.lineno(), ' ', ps.stem(w).lower(), ' ')
+                else:
+                    print(w, ' ', type_of_word, ' ', fileinput.lineno()) ## Stem code ends here
+        input_line.strip()
+        if "#" in input_line:
             continue
         if pattern_line and pattern_line[-1] == ";":
             array.append(pattern_line)
             pattern_line = ""
-        if line and line[-1] == ";":
-            pattern_line = pattern_line + line
+        if input_line and input_line[-1] == ";":
+            pattern_line = pattern_line + input_line
             array.append(pattern_line)
             pattern_line = ""
-        elif ":" in line:
+        elif ":" in input_line:
             if pattern_line:
                 array.append(pattern_line)
-            pattern_line = line
+            pattern_line = input_line
         else:
-            pattern_line += line
+            pattern_line += input_line
     if pattern_line:
         array.append(pattern_line)
     for line in array:
@@ -143,6 +163,7 @@ def main(): # Stemmer code followed by the grammar and parts of speech generatio
                 childpart = re.findall('\s*\|\s*([a-zA-Z\-\s]+)', each)
                 for x in childpart:
                     childsubpart = x
+                    childsubpart = re.sub('[\n\t\r]+', ' ', childsubpart)
                     grammar[lhs].append(childsubpart.rstrip())
             elif re.search('\#\s*[a-zA-Z]+', each) is not None:
                 continue
@@ -156,27 +177,13 @@ def main(): # Stemmer code followed by the grammar and parts of speech generatio
                     if subpart[i] == '' or a is None:
                         continue
                     b = a.group(0)
-                    rhs = ps.stem(b)
+                    rhs = ps.stem(b).lower()
                 else:
                     rhs = subpart[i]
+                    rhs = re.sub('[\n\t\r]+', ' ', rhs)
                 grammar[lhs].append(rhs.rstrip())
 
-            for w in word_tokenize(line):
-                type_of_word = find_type_of_word(w)
-                if line.find('=') == -1:
-                    if re.search('\|*\s*([a-zA-Z\-\s]+)', w) is not None:
-                        stem_parts = re.split('\|', w)
-                        for i in range(len(stem_parts)):
-                            type_of_word = find_type_of_word(stem_parts[i])
-                            print(stem_parts[i], ' ', type_of_word, ' ', fileinput.lineno())
-                    else:
-                        print(w, ' ', type_of_word, ' ', fileinput.lineno())
 
-                else:
-                    if re.search('[A-Za-z]', w) is not None and w != "W":
-                        print(w, ' ', type_of_word, ' ', fileinput.lineno(), ' ', ps.stem(w), ' ')
-                    else:
-                        print(w, ' ', type_of_word, ' ', fileinput.lineno())
     if semi < colon:
         sys.exit("Input is erroneous: Semicolon missing!!!")
     print("ENDFILE")
