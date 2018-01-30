@@ -85,8 +85,9 @@ def enqueue(state, chart_entry): # adds the passed rules onto a chart
     if i == 0:
         s[state].append(chart_entry)
 
-
+stemmer_printer=[]
 def main(): # Stemmer code followed by the grammar and parts of speech generation
+    global stemmer_printer
     ps = PorterStemmer()
     pattern_line = ""
     array = []
@@ -94,7 +95,7 @@ def main(): # Stemmer code followed by the grammar and parts of speech generatio
     for input_line in fileinput.input():
         for w in word_tokenize(input_line): ## Stem code begins here - word by
             if count == 0:
-                print("Stemmer: ")
+                stemmer_printer.append("".join(["\nStemmer: "]))
                 count += 1
             type_of_word = find_type_of_word(w)
             if input_line.find('=') == -1:
@@ -102,19 +103,19 @@ def main(): # Stemmer code followed by the grammar and parts of speech generatio
                     stem_parts = re.split('\|', w)
                     for i in range(len(stem_parts)):
                         if len(stem_parts) > 1 and i == 1 and stem_parts[i] is not '':
-                            print('|', ' ', 'OP', ' ', fileinput.lineno())
+                            stemmer_printer.append("".join(['|', ' ', 'OP', ' ', str(fileinput.lineno())]))
                         if stem_parts[i] is '':
-                            print('|', ' ', 'OP', ' ', fileinput.lineno())
+                            stemmer_printer.append("".join(['|', ' ', 'OP', ' ', str(fileinput.lineno())]))
                         else:
                             type_of_word = find_type_of_word(stem_parts[i])
-                            print(stem_parts[i], ' ', type_of_word, ' ', fileinput.lineno())
+                            stemmer_printer.append("".join([stem_parts[i], ' ', type_of_word, ' ', str(fileinput.lineno())]))
                 else:
-                    print(w, ' ', type_of_word, ' ', fileinput.lineno())
+                    stemmer_printer.append("".join([w, ' ', type_of_word, ' ', str(fileinput.lineno())]))
             else:
                 if re.search('[A-Za-z]', w) is not None and w != "W":
-                    print(w, ' ', type_of_word, ' ', fileinput.lineno(), ' ', ps.stem(w).lower(), ' ')
+                    stemmer_printer.append("".join([w, ' ', type_of_word, ' ', str(fileinput.lineno()), ' ', ps.stem(w).lower(), ' ']))
                 else:
-                    print(w, ' ', type_of_word, ' ', fileinput.lineno()) ## Stem code ends here
+                    stemmer_printer.append("".join([w, ' ', type_of_word, ' ', str(fileinput.lineno())])) ## Stem code ends here
         input_line.strip()
         if "#" in input_line:
             continue
@@ -189,7 +190,7 @@ def main(): # Stemmer code followed by the grammar and parts of speech generatio
     if semi < colon:
         print("Input is erroneous: Semicolon missing!!!")
         sys.exit("Input is erroneous: Semicolon missing!!!")
-    print("ENDFILE")
+
     if not grammar or 'W' not in grammar:
         print("No Input: Illegal!!!")
         sys.exit("No Input: Illegal!!!")
@@ -212,6 +213,13 @@ def initialize(words): #grammar is fed to the earley parser after initial checks
     earley_parser(grammar["W"])
 
 
+def printStemmer():
+    global stemmer_printer
+    for each in stemmer_printer:
+        print(each)
+    print("ENDFILE")
+
+
 def create_parse_chart(): # creates a chart out of the given parsing logic
     print("\nParsed Chart: ")
     chart_number = 0
@@ -227,5 +235,6 @@ def create_parse_chart(): # creates a chart out of the given parsing logic
 
 main()
 initialize(grammar["W"])
+printStemmer()
 create_parse_chart()
 
