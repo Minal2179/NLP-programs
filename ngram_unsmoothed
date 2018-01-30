@@ -1,0 +1,86 @@
+from nltk import word_tokenize
+import fileinput
+
+def ngram():
+    global unigram,bigram,corpus_length,sorted_vocab_keys
+    unigram = dict()
+    bigram = dict()
+    corpus_length = 0
+
+    for line in fileinput.input():
+        prev_word = 'START'
+        for word in word_tokenize(line):
+            if word != 'START':
+                if word in unigram:
+                    unigram[word] = unigram[word] + 1
+                else:
+                    unigram[word] = 1
+                bigram[(prev_word,word)] = bigram.get((prev_word,word),0) + 1
+                prev_word = word
+                print(word)
+                if word != 'END':
+                    corpus_length += 1
+            else:
+                if word in unigram:
+                    unigram[word] = unigram[word] + 1
+                else:
+                    unigram[word] = 1
+    sorted_vocab_keys = list(unigram.keys())
+    sorted_vocab_keys.remove('START')
+    sorted_vocab_keys.remove('END')
+    sorted_vocab_keys.sort()
+    sorted_vocab_keys.append('START')
+    sorted_vocab_keys.append('END')
+    print("=== Frequencies of unigrams ===")
+    print("")
+    for each in unigram:
+        print(each, " : ", unigram[each])
+    print("")
+    print("\n=== Frequencies of bigrams ===")
+    print("")
+    for each in bigram:
+        print(each, " : ", bigram[each])
+    print("")
+
+def calculate_unigram_probability(word):
+    return float(unigram[word])/float(corpus_length)
+
+def calculate_bigram_probability(prev_word,word):
+    return 0.0 if bigram.get((prev_word,word),0) == 0 or unigram[prev_word] == 0 else float(
+        bigram.get((prev_word, word), 0)) / float(unigram[prev_word])
+
+# print unigram and bigram probs
+def print_unigram_probs(sorted_vocab_keys):
+    for vocab_key in sorted_vocab_keys:
+        if vocab_key != 'START' and vocab_key != 'END':
+            print("\n","{}: {}".format(vocab_key ,calculate_unigram_probability(vocab_key)), end=" ")
+    print("")
+
+def print_bigram_probs(sorted_vocab_keys):
+    print("\t\t", end="")
+    for vocab_key in sorted_vocab_keys:
+        if vocab_key != 'START':
+            print(vocab_key, end="\t\t\t")
+    print("")
+    for vocab_key in sorted_vocab_keys:
+        if vocab_key != 'END':
+            print(vocab_key, end="\t")
+            for vocab_key_second in sorted_vocab_keys:
+                if vocab_key_second != 'START':
+                    print("{0:.5f}".format(calculate_bigram_probability(vocab_key, vocab_key_second)), end="\t\t\t")
+            print("")
+    print("")
+
+ngram()
+print("")
+print("---- UNSMOOTHED UNIGRAM AND BIGRAM COMPUTATIONS ARE AS FOLLOWS ----")
+print("")
+
+print("***** UNIGRAM MODEL *****")
+print_unigram_probs(sorted_vocab_keys)
+
+
+print("")
+
+print("***** BIGRAM MODEL *****")
+print_bigram_probs(sorted_vocab_keys)
