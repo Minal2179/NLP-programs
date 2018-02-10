@@ -28,8 +28,9 @@ print("\nLoading table  [" + tablename + "] in database [" + DBNAME + "] from " 
 i=0
 failed=0
 
-print("Connecting to database...", end=" ")
-cursor = utils.db_connection()
+print("Connecting to database...")
+connection = utils.db_connection()
+cursor = connection.cursor()
 print("connected.")
 
 DATE = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
