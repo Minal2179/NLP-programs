@@ -1,4 +1,5 @@
 #CSV extract from database table
+#Run this and dataload on python3
 import sys
 
 import csv
