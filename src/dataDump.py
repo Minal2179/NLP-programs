@@ -27,8 +27,9 @@ def containsAny(s, set):
 
 # MAIN #
 
-print("Connecting to database...", end=" ")
-cursor = utils.db_connection()
+print("Connecting to database...")
+connection = utils.db_connection()
+cursor = connection.cursor()
 print("connected.")
 
 ## Dump Data ##
@@ -58,7 +59,7 @@ for row in cursor.fetchall():
   
     line = []
     # need to comma separate strings 
-    for key in fieldnames:
+    for key in range(0,len(fieldnames)):
         val = row[key]
         # imperfect method to detect numerics and do quoting
         # - any alpha's or punctuation?  double-quote accordingly
@@ -73,4 +74,3 @@ for row in cursor.fetchall():
         f.write(linestr + "\n")
     else:
         print(linestr)
-
